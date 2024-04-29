@@ -1,0 +1,44 @@
+
+import pandas as pd
+from fbprophet import Prophet
+import yfinance as yf
+def load_stock_data(ticker, start_date, end_date):
+    stock_data = yf.download(ticker, start=start_date, end=end_date)
+    return stock_data
+def prepare_data(data):
+    df = pd.DataFrame()
+    df["ds"] = data.index
+    df["y"] = data["Close"].values
+    return df
+def train_model(data):
+    model = Prophet()
+    model.fit(data)
+    return model
+def make_predictions(model, periods):
+    future = model.make_future_dataframe(periods=periods)
+    forecast = model.predict(future)
+    return forecast
+def plot_predictions(model, forecast):
+    fig = model.plot(forecast)
+    return fig
+if __name__ == "__main__":
+    # Define stock ticker symbol and date range
+    ticker = "AAPL"  # Example: Apple Inc.
+    start_date = "2020-01-01"
+    end_date = "2021-12-31"
+    
+    # Load stock data
+    stock_data = load_stock_data(ticker, start_date, end_date)
+    
+    # Prepare data for Prophet
+    df = prepare_data(stock_data)
+    
+    # Train model
+    model = train_model(df)
+    
+    # Make predictions
+    forecast = make_predictions(model, periods=365)  # Predict for 1 year
+    
+    # Plot predictions
+    fig = plot_predictions(model, forecast)
+    fig.show()
